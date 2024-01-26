@@ -11,7 +11,7 @@ rm -rf /workspace/venv
 
 echo "Cloning InstantID Serverless Worker repo to /workspace"
 cd /workspace
-git https://github.com/ashleykleynhans/runpod-worker-instantid.git
+git clone https://github.com/ashleykleynhans/runpod-worker-instantid.git
 cd runpod-worker-instantid
 
 echo "Installing Ubuntu updates"
@@ -24,7 +24,7 @@ python3 -m venv /workspace/venv
 source /workspace/venv/bin/activate
 
 echo "Installing Torch"
-pip3 install --no-cache-dir torch==${TORCH_VERSION} torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip3 install --no-cache-dir torch==${TORCH_VERSION} torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 echo "Installing xformers"
 pip3 install --no-cache-dir xformers==${XFORMERS_VERSION}
