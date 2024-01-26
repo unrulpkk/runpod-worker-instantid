@@ -9,10 +9,9 @@ import requests
 import base64
 
 import PIL
-from PIL import Image
+from PIL import Image, ImageOps
 
 import diffusers
-from diffusers.utils import load_image
 from diffusers.models import ControlNetModel
 
 from huggingface_hub import hf_hub_download
@@ -58,26 +57,29 @@ logger = RunPodLogger()
 def load_image(image_file: str):
     if image_file.startswith('http://') or image_file.startswith('https://'):
         response = requests.get(image_file)
-        image = Image.open(BytesIO(response.content)).convert('RGB')
+        image = Image.open(BytesIO(response.content))
     else:
         image = load_image_from_base64(image_file)
+
+    image = ImageOps.exif_transpose(image)
+    image = image.convert('RGB')
     return image
 
 
 def load_image_from_base64(base64_str: str):
     image_bytes = base64.b64decode(base64_str)
-    image = Image.open(BytesIO(image_bytes)).convert('RGB')
+    image = Image.open(BytesIO(image_bytes))
     return image
 
 
 def get_instantid_pipeline(pretrained_model_name_or_path):
     if pretrained_model_name_or_path.endswith(
-            ".ckpt"
-    ) or pretrained_model_name_or_path.endswith(".safetensors"):
+            '.ckpt'
+    ) or pretrained_model_name_or_path.endswith('.safetensors'):
         scheduler_kwargs = hf_hub_download(
-            repo_id="wangqixun/YamerMIX_v8",
-            subfolder="scheduler",
-            filename="scheduler_config.json",
+            repo_id='wangqixun/YamerMIX_v8',
+            subfolder='scheduler',
+            filename='scheduler_config.json',
         )
 
         (tokenizers, text_encoders, unet, _, vae) = load_models_xl(
