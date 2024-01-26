@@ -32,20 +32,41 @@ chmod +x install.sh
 You only need to complete the steps below if you did not run the
 automatic installation script above.
 
-1. Install thhe requirements for InstantID:
+1. Install InstantID:
 ```bash
+# Clone InstantID Serverless Worker repo to /workspace
 cd /workspace
 git clone https://github.com/ashleykleynhans/runpod-worker-instantid.git
 cd runpod-worker-instantid/src
+
+# Install Ubuntu updates
+apt update
+apt -y upgrade
+
+# Install git-lfs
+apt -y install git-lfs
+git lfs install
+
+# Create and activate venv
 python3 -m venv /workspace/venv
 source /workspace/venv/bin/activate
+
+# Install torch
 pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Install xformers
 pip3 install --no-cache-dir xformers==0.0.22
+
+# Install the requirements for InstantID
 pip3 install -r requirements.txt
 ```
 2. Download the checkpoints:
 ```bash
 python3 download_checkpoints.py
+```
+3. Download antelopev2 models from Huggingface
+```bash
+git clone https://huggingface.co/Aitrepreneur/models
 ```
 
 ## Building the Docker Image

@@ -18,6 +18,10 @@ echo "Installing Ubuntu updates"
 apt update
 apt -y upgrade
 
+echo "Installing git-lfs"
+apt -y install git-lfs
+git lfs install
+
 echo "Creating and activating venv"
 cd /workspace/runpod-worker-instantid
 python3 -m venv /workspace/venv
@@ -35,6 +39,9 @@ pip3 install -r src/requirements.txt
 echo "Installing checkpoints"
 cd /workspace/runpod-worker-instantid/src
 python3 download_checkpoints.py
+
+echo "Downloading antelopev2 models from Huggingface"
+git clone https://huggingface.co/Aitrepreneur/models
 
 echo "Creating log directory"
 mkdir -p /workspace/logs
