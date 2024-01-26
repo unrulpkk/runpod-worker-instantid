@@ -1,5 +1,3 @@
-import os
-import sys
 import torch
 import cv2
 import math
@@ -7,6 +5,7 @@ import random
 import numpy as np
 import requests
 import base64
+import traceback
 
 import PIL
 from PIL import Image, ImageOps
@@ -15,8 +14,6 @@ import diffusers
 from diffusers.models import ControlNetModel
 
 from huggingface_hub import hf_hub_download
-
-import insightface
 from insightface.app import FaceAnalysis
 
 from style_template import styles
@@ -70,6 +67,23 @@ def load_image_from_base64(base64_str: str):
     image_bytes = base64.b64decode(base64_str)
     image = Image.open(BytesIO(image_bytes))
     return image
+
+
+def determine_file_extension(image_data):
+    image_extension = None
+
+    try:
+        if image_data.startswith('/9j/'):
+            image_extension = '.jpg'
+        elif image_data.startswith('iVBORw0Kg'):
+            image_extension = '.png'
+        else:
+            # Default to png if we can't figure out the extension
+            image_extension = '.png'
+    except Exception as e:
+        image_extension = '.png'
+
+    return image_extension
 
 
 def get_instantid_pipeline(pretrained_model_name_or_path):
@@ -212,7 +226,7 @@ def generate_image(
     # apply the style template
     prompt, negative_prompt = apply_style(style_name, prompt, negative_prompt)
 
-    face_image = load_image(face_image[0])
+    face_image = load_image(face_image)
     face_image = resize_img(face_image)
     face_image_cv2 = convert_from_image_to_cv2(face_image)
     height, width, _ = face_image_cv2.shape
@@ -228,7 +242,7 @@ def generate_image(
     face_kps = draw_kps(convert_from_cv2_to_image(face_image_cv2), face_info['kps'])
 
     if pose_image is not None:
-        pose_image = load_image(pose_image[0])
+        pose_image = load_image(pose_image)
         pose_image = resize_img(pose_image)
         pose_image_cv2 = convert_from_image_to_cv2(pose_image)
 
@@ -278,7 +292,7 @@ def handler(job):
     try:
         payload = validated_input['validated_input']
 
-        filename = generate_image(
+        images = generate_image(
             job['id'],
             payload.get('model'),
             payload.get('face_image'),
@@ -293,8 +307,21 @@ def handler(job):
             payload.get('seed')
         )
 
+        result_image = images[0]
+        output_buffer = BytesIO()
+        result_image.save(output_buffer, format='JPEG')
+        image_data = output_buffer.getvalue()
+
+        return {
+            'image': base64.b64encode(image_data).decode('utf-8')
+        }
     except Exception as e:
-        raise
+        logger.error(f'An exception was raised: {e}')
+
+        return {
+            'error': traceback.format_exc(),
+            'refresh_worker': True
+        }
 
 
 # ---------------------------------------------------------------------------- #
