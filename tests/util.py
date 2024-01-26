@@ -1,23 +1,13 @@
-import sys
+import io
 import time
 import json
+import uuid
 import base64
 import requests
+from PIL import Image
 from dotenv import dotenv_values
 
-STATUS_COMPLETED = 'COMPLETED'
-
-
-class Timer:
-    def __init__(self):
-        self.start = time.time()
-
-    def restart(self):
-        self.start = time.time()
-
-    def get_elapsed_time(self):
-        end = time.time()
-        return round(end - self.start, 1)
+OUTPUT_FORMAT = 'JPEG'
 
 
 def encode_image_to_base64(image_path):
@@ -25,97 +15,94 @@ def encode_image_to_base64(image_path):
         return str(base64.b64encode(image_file.read()).decode('utf-8'))
 
 
-def handle_response(resp_json, timer):
-    print(json.dumps(resp_json, indent=4, default=str))
-    total_time = timer.get_elapsed_time()
-    print(f'Total time taken for RunPod Serverless API call {total_time} seconds')
+def save_result_image(resp_json):
+    img = Image.open(io.BytesIO(base64.b64decode(resp_json['output']['image'])))
+    file_extension = 'jpeg' if OUTPUT_FORMAT == 'JPEG' else 'png'
+    output_file = f'{uuid.uuid4()}.{file_extension}'
+
+    with open(output_file, 'wb') as f:
+        print(f'Saving image: {output_file}')
+        img.save(f, format=OUTPUT_FORMAT)
 
 
-def get_endpoint_details():
+def handle_response(resp_json):
+    if resp_json['output'] is not None and 'image' in resp_json['output']:
+        save_result_image(resp_json)
+    else:
+        print(json.dumps(resp_json, indent=4, default=str))
+
+
+def post_request(payload):
     env = dotenv_values('.env')
-    api_key = env.get('RUNPOD_API_KEY', None)
-    endpoint_id = env.get('RUNPOD_ENDPOINT_ID', None)
+    runpod_api_key = env.get('RUNPOD_API_KEY', None)
+    runpod_endpoint_id = env.get('RUNPOD_ENDPOINT_ID', None)
 
-    return api_key, endpoint_id
-
-
-def cancel_task(task_id):
-    api_key, endpoint_id = get_endpoint_details()
-
-    return requests.post(
-        f'https://api.runpod.ai/v2/{endpoint_id}/cancel/{task_id}',
-        headers={
-            'Authorization': f'Bearer {api_key}'
-        }
-    )
-
-
-def purge_queue():
-    api_key, endpoint_id = get_endpoint_details()
-
-    return requests.post(
-        f'https://api.runpod.ai/v2/{endpoint_id}/purge-queue',
-        headers={
-            'Authorization': f'Bearer {api_key}'
-        }
-    )
-
-
-def stream(payload, stream=False):
-    api_key, endpoint_id = get_endpoint_details()
-    uri = f'https://api.runpod.ai/v2/{endpoint_id}/run'
+    if runpod_api_key is not None and runpod_endpoint_id is not None:
+        base_url = f'https://api.runpod.ai/v2/{runpod_endpoint_id}'
+    else:
+        base_url = f'http://127.0.0.1:8000'
 
     r = requests.post(
-        uri,
-        json=dict(input=payload),
+        f'{base_url}/runsync',
         headers={
-            'Authorization': f'Bearer {api_key}'
-        }
+            'Authorization': f'Bearer {runpod_api_key}'
+        },
+        json=payload
     )
 
-    print(r.status_code)
+    print(f'Status code: {r.status_code}')
 
     if r.status_code == 200:
-        data = r.json()
-        task_id = data.get('id')
-        return stream_output(task_id, stream)
+        resp_json = r.json()
 
+        if 'output' in resp_json:
+            handle_response(resp_json)
+        else:
+            job_status = resp_json['status']
+            print(f'Job status: {job_status}')
 
-def stream_output(task_id, stream=False):
-    api_key, endpoint_id = get_endpoint_details()
+            if job_status == 'IN_QUEUE' or job_status == 'IN_PROGRESS':
+                request_id = resp_json['id']
+                request_in_queue = True
 
-    uri = f'https://api.runpod.ai/v2/{endpoint_id}/stream/{task_id}'
+                while request_in_queue:
+                    r = requests.get(
+                        f'{base_url}/status/{request_id}',
+                        headers={
+                            'Authorization': f'Bearer {runpod_api_key}'
+                        },
+                    )
 
-    headers = {
-        'Authorization': f'Bearer {api_key}'
-    }
+                    print(f'Status code from RunPod status endpoint: {r.status_code}')
 
-    previous_output = ''
+                    if r.status_code == 200:
+                        resp_json = r.json()
+                        job_status = resp_json['status']
 
-    try:
-        while True:
-            response = requests.get(uri, headers=headers)
-
-            if response.status_code == 200:
-                data = response.json()
-                print(data)
-
-                if len(data['stream']) > 0:
-                    new_output = data['stream'][0]['output']
-                    sys.stdout.write(new_output[len(previous_output):])
-                    sys.stdout.flush()
-                    previous_output = new_output
-
-                if data.get('status') == STATUS_COMPLETED:
-                    if not stream:
-                        return previous_output
-                    break
-
-            elif response.status_code >= 400:
-                print(response)
-
-            # Sleep for 0.1 seconds between each request
-            time.sleep(0.1 if stream else 1)
-    except Exception as e:
-        print(e)
-        cancel_task(task_id)
+                        if job_status == 'IN_QUEUE' or job_status == 'IN_PROGRESS':
+                            print(f'RunPod request {request_id} is {job_status}, sleeping for 5 seconds...')
+                            time.sleep(5)
+                        elif job_status == 'FAILED':
+                            request_in_queue = False
+                            print(f'RunPod request {request_id} failed')
+                            print(json.dumps(resp_json, indent=4, default=str))
+                        elif job_status == 'COMPLETED':
+                            request_in_queue = False
+                            print(f'RunPod request {request_id} completed')
+                            handle_response(resp_json)
+                        elif job_status == 'TIMED_OUT':
+                            request_in_queue = False
+                            print(f'ERROR: RunPod request {request_id} timed out')
+                        else:
+                            request_in_queue = False
+                            print(f'ERROR: Invalid status response from RunPod status endpoint')
+                            print(json.dumps(resp_json, indent=4, default=str))
+            elif job_status == 'COMPLETED' \
+                    and 'output' in resp_json \
+                    and 'status' in resp_json['output'] \
+                    and resp_json['output']['status'] == 'error':
+                print(f'ERROR: {resp_json["output"]["message"]}')
+            else:
+                print(json.dumps(resp_json, indent=4, default=str))
+    else:
+        print(f'ERROR: {r.content}')

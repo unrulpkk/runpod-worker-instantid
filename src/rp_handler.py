@@ -7,7 +7,6 @@ import requests
 import base64
 import traceback
 
-import PIL
 from PIL import Image, ImageOps
 
 import diffusers
@@ -174,7 +173,7 @@ def draw_kps(image_pil, kps, color_list=[(255, 0, 0), (0, 255, 0), (0, 0, 255), 
 
 
 def resize_img(input_image, max_side=1280, min_side=1024, size=None,
-               pad_to_max_side=False, mode=PIL.Image.BILINEAR, base_pixel_number=64):
+               pad_to_max_side=False, mode=Image.BILINEAR, base_pixel_number=64):
 
     w, h = input_image.size
     if size is not None:

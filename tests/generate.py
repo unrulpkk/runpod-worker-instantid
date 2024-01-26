@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from util import stream, encode_image_to_base64
+from util import post_request, encode_image_to_base64
 
 MODEL_PATH = 'wangqixun/YamerMIX_v8'
 IMAGE_PATH = '../data/mypic.jpg'
@@ -30,4 +30,4 @@ if __name__ == '__main__':
         }
     }
 
-    stream(payload)
+    post_request(payload)
