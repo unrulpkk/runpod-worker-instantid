@@ -219,7 +219,7 @@ def generate_image(
     face_info = app.get(face_image_cv2)
 
     if len(face_info) == 0:
-        raise Exception(f'Cannot find any face in the image!')
+        raise Exception(f'Cannot find any face in the face image!')
 
     face_info = sorted(face_info, key=lambda x:(x['bbox'][2]-x['bbox'][0])*x['bbox'][3]-x['bbox'][1])[-1]  # only use the maximum face
     face_emb = face_info['embedding']
