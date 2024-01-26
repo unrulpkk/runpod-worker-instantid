@@ -38,6 +38,8 @@ pip3 install -r src/requirements.txt
 
 echo "Installing checkpoints"
 cd /workspace/runpod-worker-instantid/src
+export HUGGINGFACE_HUB_CACHE="/workspace/huggingface-cache/hub"
+export TRANSFORMERS_CACHE="/workspace/huggingface-cache/hub"
 python3 download_checkpoints.py
 
 echo "Downloading antelopev2 models from Huggingface"

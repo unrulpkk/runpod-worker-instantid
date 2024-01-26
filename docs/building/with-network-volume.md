@@ -62,6 +62,8 @@ pip3 install -r requirements.txt
 ```
 2. Download the checkpoints:
 ```bash
+export HUGGINGFACE_HUB_CACHE="/workspace/huggingface-cache/hub"
+export TRANSFORMERS_CACHE="/workspace/huggingface-cache/hub"
 python3 download_checkpoints.py
 ```
 3. Download antelopev2 models from Huggingface
