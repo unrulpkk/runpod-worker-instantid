@@ -2,8 +2,10 @@
 
 echo "Worker Initiated"
 
-echo "Symlinking files from Network Volume"
-ln -s /runpod-volume /workspace
+if [[ ! -L /workspace ]]; then
+  echo "Symlinking files from Network Volume"
+  ln -s /runpod-volume /workspace
+fi
 
 echo "Starting RunPod Handler"
 export PYTHONUNBUFFERED=1
