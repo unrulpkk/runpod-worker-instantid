@@ -50,11 +50,11 @@ COPY src/schemas /app/schemas
 RUN pip3 install -r requirements.txt && \
     pip3 cache purge
 
-# Download antelopev2 models from Huggingface
-RUN git clone https://huggingface.co/Aitrepreneur/models
-
 # Download the checkpoints
 RUN python3 download_checkpoints.py
+
+# Download antelopev2 models from Huggingface
+RUN git clone https://huggingface.co/Aitrepreneur/models
 
 # Docker container start script
 COPY --chmod=755 start_standalone.sh /start.sh
