@@ -34,10 +34,6 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean -y
 
-# Install torch and xformers
-RUN pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install --no-cache-dir xformers==0.0.22
-
 # Set the working directory
 WORKDIR /app
 
@@ -46,9 +42,14 @@ COPY src/* ./
 COPY src/ip_adapter /app/ip_adapter
 COPY src/schemas /app/schemas
 
-# Install the worker
-RUN pip3 install -r requirements.txt && \
-    pip3 cache purge
+# Install the worker dependencies
+RUN python3 -m venv /venv && \
+    source /venv/bin/activate
+    pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip3 install --no-cache-dir xformers==0.0.22 && \
+    pip3 install -r requirements.txt && \
+    pip3 cache purge && \
+    deactivate
 
 # Download the checkpoints
 RUN python3 download_checkpoints.py
