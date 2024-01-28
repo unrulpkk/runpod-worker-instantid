@@ -4,6 +4,5 @@ echo "Worker Initiated"
 
 echo "Starting RunPod Handler"
 export PYTHONUNBUFFERED=1
-cd /app
-source /venv/bin/activate
+cd /workspace/runpod-worker-instantid/src
 python3 -u rp_handler.py
