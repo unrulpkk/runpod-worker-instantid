@@ -12,7 +12,7 @@ from PIL import Image, ImageOps
 import diffusers
 from diffusers.models import ControlNetModel
 
-from huggingface_hub import hf_hub_download
+import insightface
 from insightface.app import FaceAnalysis
 
 from style_template import styles
@@ -24,6 +24,7 @@ from runpod.serverless.utils.rp_validator import validate
 from runpod.serverless.modules.rp_logger import RunPodLogger
 
 from io import BytesIO
+from huggingface_hub import hf_hub_download
 from schemas.input import INPUT_SCHEMA
 
 # Global variables
@@ -31,6 +32,7 @@ MAX_SEED = np.iinfo(np.int32).max
 device = get_torch_device()
 dtype = torch.float16 if str(device).__contains__('cuda') else torch.float32
 STYLE_NAMES = list(styles.keys())
+DEFAULT_MODEL = 'wangqixun/YamerMIX_v8'
 DEFAULT_STYLE_NAME = 'Watercolor'
 
 # Load face encoder
@@ -129,6 +131,10 @@ def get_instantid_pipeline(pretrained_model_name_or_path):
     return pipe
 
 
+CURRENT_MODEL = DEFAULT_MODEL
+PIPELINE = get_instantid_pipeline(CURRENT_MODEL)
+
+
 def randomize_seed_fn(seed: int, randomize_seed: bool) -> int:
     if randomize_seed:
         seed = random.randint(0, MAX_SEED)
@@ -216,6 +222,8 @@ def generate_image(
         seed
         ):
 
+    global CURRENT_MODEL, PIPELINE
+
     if face_image is None:
         raise Exception(f'Cannot find any input face image! Please upload the face image')
 
@@ -262,9 +270,12 @@ def generate_image(
     logger.info(f'Prompt: {prompt})', job_id)
     logger.info(f'Negative Prompt: {negative_prompt}', job_id)
 
-    pipe = get_instantid_pipeline(model)
-    pipe.set_ip_adapter_scale(adapter_strength_ratio)
-    images = pipe(
+    if model != CURRENT_MODEL:
+        PIPELINE = get_instantid_pipeline(model)
+        CURRENT_MODEL = model
+
+    PIPELINE.set_ip_adapter_scale(adapter_strength_ratio)
+    images = PIPELINE(
         prompt=prompt,
         negative_prompt=negative_prompt,
         image_embeds=face_emb,
