@@ -52,7 +52,8 @@ RUN python3 -m venv /venv && \
     deactivate
 
 # Download the checkpoints
-RUN python3 download_checkpoints.py
+RUN source /venv/bin/activate && \
+    python3 download_checkpoints.py
 
 # Download antelopev2 models from Huggingface
 RUN git clone https://huggingface.co/Aitrepreneur/models
