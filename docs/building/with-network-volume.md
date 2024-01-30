@@ -71,7 +71,7 @@ python3 download_checkpoints.py
 ```
 3. Download antelopev2 models from Huggingface
 ```bash
-git clone https://huggingface.co/Aitrepreneur/models
+git clone https://huggingface.co/ashleykleynhans/FaceAnalysis models
 ```
 
 ## Building the Docker Image

@@ -46,7 +46,7 @@ export TRANSFORMERS_CACHE="/workspace/huggingface-cache/hub"
 python3 download_checkpoints.py
 
 echo "Downloading antelopev2 models from Huggingface"
-git clone https://huggingface.co/Aitrepreneur/models
+git clone https://huggingface.co/ashleykleynhans/FaceAnalysis models
 
 echo "Creating log directory"
 mkdir -p /workspace/logs

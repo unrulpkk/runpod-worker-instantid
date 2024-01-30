@@ -52,7 +52,7 @@ RUN python3 download_checkpoints.py
 
 # Download antelopev2 models from Huggingface
 RUN git lfs install && \
-    git clone https://huggingface.co/Aitrepreneur/models
+    git clone https://huggingface.co/ashleykleynhans/FaceAnalysis models
 
 # Docker container start script
 COPY --chmod=755 start_standalone.sh /start.sh

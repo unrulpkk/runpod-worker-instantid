@@ -27,7 +27,9 @@ if __name__ == '__main__':
             "identitynet_strength_ratio": IDENTITYNET_STRENGTH_RATIO,
             "adapter_strength_ratio":  ADAPTER_STRENGTH_RATIO,
             "guidance_scale": GUIDANCE_SCALE,
-            "seed": SEED
+            "seed": SEED,
+            "width": 640,
+            "height": 860
         }
     }
 
