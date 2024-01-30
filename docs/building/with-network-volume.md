@@ -80,7 +80,7 @@ You can either build this Docker image yourself, your alternatively,
 you can use my pre-built image:
 
 ```
-ashleykza/runpod-worker-instantid:1.0.2
+ashleykza/runpod-worker-instantid:1.0.10
 ```
 
 If you choose to build it yourself:

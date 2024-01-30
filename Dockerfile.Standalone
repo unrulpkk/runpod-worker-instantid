@@ -29,7 +29,8 @@ RUN apt update && \
       libxrender1 \
       libxext6 \
       ffmpeg \
-      libgoogle-perftools-dev \
+      libgoogle-perftools4 \
+      libtcmalloc-minimal4 \
       procps && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* && \
