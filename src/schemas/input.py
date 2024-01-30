@@ -52,5 +52,15 @@ INPUT_SCHEMA = {
         'type': int,
         'required': False,
         'default': 42
+    },
+    'width': {
+        'type': int,
+        'required': False,
+        'default': 0
+    },
+    'height': {
+        'type': int,
+        'required': False,
+        'default': 0
     }
 }

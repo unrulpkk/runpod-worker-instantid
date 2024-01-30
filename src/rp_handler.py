@@ -179,7 +179,7 @@ def draw_kps(image_pil, kps, color_list=[(255, 0, 0), (0, 255, 0), (0, 0, 255), 
 
 
 def resize_img(input_image, max_side=1280, min_side=1024, size=None,
-               pad_to_max_side=False, mode=Image.BILINEAR, base_pixel_number=64):
+               pad_to_max_side=False, mode=Image.Resampling.BILINEAR, base_pixel_number=64):
 
     w, h = input_image.size
     if size is not None:
@@ -219,7 +219,9 @@ def generate_image(
         identitynet_strength_ratio,
         adapter_strength_ratio,
         guidance_scale,
-        seed
+        seed,
+        width,
+        height
         ):
 
     global CURRENT_MODEL, PIPELINE
@@ -233,8 +235,14 @@ def generate_image(
     # apply the style template
     prompt, negative_prompt = apply_style(style_name, prompt, negative_prompt)
 
+    if width == 0 and height == 0:
+        resize_size = None
+    else:
+        logger.info(f'Width: {width}, Height: {height}')
+        resize_size = (width, height)
+
     face_image = load_image(face_image)
-    face_image = resize_img(face_image)
+    face_image = resize_img(face_image, size=resize_size)
     face_image_cv2 = convert_from_image_to_cv2(face_image)
     height, width, _ = face_image_cv2.shape
 
@@ -250,7 +258,7 @@ def generate_image(
 
     if pose_image is not None:
         pose_image = load_image(pose_image)
-        pose_image = resize_img(pose_image)
+        pose_image = resize_img(pose_image, size=resize_size)
         pose_image_cv2 = convert_from_image_to_cv2(pose_image)
 
         face_info = app.get(pose_image_cv2)
@@ -314,7 +322,9 @@ def handler(job):
             payload.get('identitynet_strength_ratio'),
             payload.get('adapter_strength_ratio'),
             payload.get('guidance_scale'),
-            payload.get('seed')
+            payload.get('seed'),
+            payload.get('width'),
+            payload.get('height')
         )
 
         result_image = images[0]
