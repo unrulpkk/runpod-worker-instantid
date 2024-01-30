@@ -10,12 +10,12 @@ source venv/bin/activate
 ## Install Requirements
 
 ```bash
-pip install -r src/requirements.txt
+pip install requests Pillow python-dotenv
 ```
 
 ## Add Runpod credentials to .env
 
-Copy the `.env.example` file to '.env' in the `tests`
+Copy the `.env.example` file to `.env` in the `tests`
 directory as follows:
 
 ```bash
