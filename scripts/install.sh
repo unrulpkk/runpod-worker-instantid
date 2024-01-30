@@ -33,6 +33,9 @@ pip3 install --no-cache-dir torch==${TORCH_VERSION} torchvision torchaudio --ind
 echo "Installing xformers"
 pip3 install --no-cache-dir xformers==${XFORMERS_VERSION}
 
+echo "Installing RunPod SDK"
+pip3 install --no-cache-dir runpod
+
 echo "Installing InstantID Serverless Worker"
 pip3 install -r src/requirements.txt
 
