@@ -300,14 +300,14 @@ def generate_image(
 
 
 def handler(job):
-    validated_input = validate(job['input'], INPUT_SCHEMA)
-
-    if 'errors' in validated_input:
-        return {
-            'error': validated_input['errors']
-        }
-
     try:
+        validated_input = validate(job['input'], INPUT_SCHEMA)
+
+        if 'errors' in validated_input:
+            return {
+                'error': validated_input['errors']
+            }
+
         payload = validated_input['validated_input']
 
         images = generate_image(
@@ -339,7 +339,8 @@ def handler(job):
         logger.error(f'An exception was raised: {e}')
 
         return {
-            'error': traceback.format_exc(),
+            'error': str(e),
+            'output': traceback.format_exc(),
             'refresh_worker': True
         }
 
