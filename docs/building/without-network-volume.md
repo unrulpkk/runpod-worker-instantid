@@ -6,7 +6,7 @@ but will obviously create a more bulky Docker image as a result.
 
 You can either use my pre-built Docker image:
 ```
-ashleykza/runpod-worker-instantid:standalone-1.0.10
+ashleykza/runpod-worker-instantid:standalone-1.0.11
 ```
 
 Or alternatively, you can build it yourself by following the
