@@ -3,7 +3,7 @@
 ```json
 {
   "input": {
-    "model": "lwangqixun/YamerMIX_v8",
+    "model": "wangqixun/YamerMIX_v8",
     "face_image": "base64 encoded image content",
     "pose_image": "base64 encoded image content",
     "prompt": "A man",
