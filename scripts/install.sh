@@ -11,7 +11,7 @@ rm -rf /workspace/venv
 
 echo "Cloning InstantID Serverless Worker repo to /workspace"
 cd /workspace
-git clone https://github.com/ashleykleynhans/runpod-worker-instantid.git
+git clone https://github.com/unrulpkk/runpod-worker-instantid.git
 cd runpod-worker-instantid
 
 echo "Installing Ubuntu updates"
