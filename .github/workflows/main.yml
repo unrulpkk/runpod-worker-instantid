@@ -14,6 +14,7 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
+    timeout-minutes: 120 # 设置作业的超时时间为 120 分钟
 
     steps:
     - name: Check out code
