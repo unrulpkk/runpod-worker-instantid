@@ -84,7 +84,7 @@ class Resampler(nn.Module):
         heads=16,
         num_queries=8,
         embedding_dim=768,
-        output_dim=1024,
+        output_dim=2048,
         ff_mult=4,
     ):
         super().__init__()
