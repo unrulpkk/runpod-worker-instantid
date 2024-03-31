@@ -57,7 +57,7 @@ def get_instantid_pipeline():
         'torch_dtype': torch_dtype,
     }
 
-    pipeline = fetch_pretrained_model('Justin-Choo/XXMix_9realisticSDXL', **args)
+    pipeline = fetch_pretrained_model('odyssey-ai/epic-realism-xl', **args)
 
     return pipeline
 
