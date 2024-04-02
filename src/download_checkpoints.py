@@ -57,7 +57,7 @@ def get_instantid_pipeline():
         'torch_dtype': torch_dtype,
     }
 
-    pipeline = fetch_pretrained_model('odyssey-ai/epic-realism-xl', **args)
+    pipeline = fetch_pretrained_model('stabilityai/stable-diffusion-xl-base-1.0', **args)
 
     return pipeline
 
