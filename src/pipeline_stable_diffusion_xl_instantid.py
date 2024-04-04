@@ -178,7 +178,7 @@ class StableDiffusionXLInstantIDPipeline(StableDiffusionXLControlNetPipeline):
         state_dict = torch.load(model_ckpt, map_location="cpu")
         if 'image_proj' in state_dict:
             state_dict = state_dict["image_proj"]
-        self.image_proj_model.load_state_dict(state_dict)
+        self.image_proj_model.load_state_dict(state_dict, strict=False)
         
         self.image_proj_model_in_features = image_emb_dim
     
