@@ -226,7 +226,7 @@ def load_checkpoint_model(
     unet_config["addition_embed_type"] = None
     converted_unet_checkpoint = convert_ldm_unet_checkpoint(state_dict, unet_config)
     unet = UNet2DConditionModel(**unet_config)
-    unet.load_state_dict(converted_unet_checkpoint)
+    unet.load_state_dict(converted_unet_checkpoint, strict=False)
 
     tokenizer = pipe.tokenizer
     text_encoder = pipe.text_encoder
